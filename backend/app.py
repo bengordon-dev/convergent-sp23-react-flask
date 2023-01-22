@@ -15,6 +15,7 @@ users = mongo.db.users
 threads = mongo.db.threads
 posts = mongo.db.posts
 
+
 # data must be a dictionary 
 def flatten_ids_dates(data):
     if not isinstance(data, dict):
@@ -43,6 +44,16 @@ def set_creator_info(data):
         del data["threadID"]
     return data
 
+
+# form data required: username
+@app.route("/createAccount", methods=["POST"])
+def create_account():
+    user_dict = {"username": request.form["username"], "joined": datetime.now()}
+    user_obj = User(**user_dict)
+    users.insert_one(user_obj.__dict__)
+    return to_json(user_obj.__dict__)
+
+# form data required: creatorID, category, title
 @app.route("/createThread", methods=["POST"])
 def create_thread():
     needed_keys = ["creatorID", "category", "title"]
@@ -67,7 +78,6 @@ def get_all_threads(category=""):
         set_creator_info(thread)
     return {"threads": thread_list}
     
-
 @app.route("/getAllPosts/<thread>", methods=["GET"])
 def get_all_posts(thread):
     post_list = to_json(posts.find({"threadID": ObjectId(thread)}))
@@ -75,6 +85,7 @@ def get_all_posts(thread):
         set_creator_info(post)
     return {"posts": post_list}
 
+# form data required: creatorID, content
 @app.route("/reply/<thread>", methods=["POST"])
 def post_on_thread(thread):
     needed_keys = ["creatorID", "content"]
@@ -105,10 +116,3 @@ def delete_post(post):
 def delete_thread(thread):
     # requires checking user ID
     pass
-
-@app.route("/createAccount/<username>", methods=["POST"])
-def create_account(username):
-    user_dict = {"username": username, "joined": datetime.now()}
-    user_obj = User(**user_dict)
-    users.insert_one(user_obj.__dict__)
-    return to_json(user_obj.__dict__)
