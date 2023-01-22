@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 
-import flask
-from flask import Flask, request, url_for, jsonify
+from flask import Flask, request
 import json
-import os
 from flask_pymongo import PyMongo
-from pymongo.collection import Collection, ReturnDocument
 from datetime import datetime
 from schemas import Thread, Post, User
 from bson import json_util, ObjectId
-
-
 
 app = Flask("Forum")
 app.config["MONGO_URI"] = "mongodb://localhost:27017/forum"
@@ -20,16 +15,18 @@ users = mongo.db.users
 threads = mongo.db.threads
 posts = mongo.db.posts
 
+# data must be a dictionary 
 def flatten_ids_dates(data):
-    if isinstance(data, dict):
-        for x in data:
-            if isinstance(data[x], dict):
-                if "$oid" in data[x]:
-                    data[x] = data[x]["$oid"]
-                elif "$date" in data[x]:
-                    data[x] = data[x]["$date"]
+    if not isinstance(data, dict):
+        raise ValueError("Data must be a dictionary")
+    for x in data: # iterating through keys of a dictionary
+        if isinstance(data[x], dict):
+            if "$oid" in data[x]:
+                data[x] = data[x]["$oid"]
+            elif "$date" in data[x]:
+                data[x] = data[x]["$date"]
 
-# purely for code readability
+# cleans up dates and ids
 def to_json(data):
     out = json.loads(json_util.dumps(data, default=json_util.default))
     if isinstance(out, list):
@@ -38,6 +35,13 @@ def to_json(data):
     if isinstance(out, dict):
         flatten_ids_dates(out)
     return out
+
+def set_creator_info(data):
+    data["creator"] = to_json(users.find_one({"_id": ObjectId(data["creatorID"])}))
+    del data["creatorID"]
+    if "threadID" in data:
+        del data["threadID"]
+    return data
 
 @app.route("/createThread", methods=["POST"])
 def create_thread():
@@ -49,7 +53,7 @@ def create_thread():
     }
     new_thread = Thread(**dict_thread)
     threads.insert_one(new_thread.__dict__)
-    return to_json(new_thread.__dict__)
+    return to_json(set_creator_info(new_thread.__dict__))
 
 @app.route("/getAllThreads/", methods=["GET"])
 @app.route("/getAllThreads/<category>", methods=["GET"])
@@ -60,18 +64,15 @@ def get_all_threads(category=""):
     else:
         thread_list = to_json(threads.find({"category": category}))
     for thread in thread_list:
-        thread["creator"] = to_json(users.find_one({"_id": ObjectId(thread["creatorID"])}))
-        del thread["creatorID"]
+        set_creator_info(thread)
     return {"threads": thread_list}
     
 
-@app.route("/fetchAllPosts/<thread>", methods=["GET"])
-def fetch_all_posts(thread):
+@app.route("/getAllPosts/<thread>", methods=["GET"])
+def get_all_posts(thread):
     post_list = to_json(posts.find({"threadID": ObjectId(thread)}))
     for post in post_list:
-        post["creator"] = to_json(users.find_one({"_id": ObjectId(post["creatorID"])}))
-        del post["creatorID"]
-        del post["threadID"]
+        set_creator_info(post)
     return {"posts": post_list}
 
 @app.route("/reply/<thread>", methods=["POST"])
@@ -86,33 +87,28 @@ def post_on_thread(thread):
     posts.insert_one(new_post.__dict__)
     old_post_count = threads.find_one({"_id": ObjectId(thread)})["posts"]
     threads.update_one({"_id": ObjectId(thread)}, 
-        {"$set": {"posts": old_post_count + 1, "lastPost": new_post.__dict__["creationTimestamp"]}}
+        {"$set": {"posts": old_post_count + 1, "lastPost": new_post.creationTimestamp}}
     )
-    
-    return to_json(new_post.__dict__)
+    return to_json(set_creator_info(new_post.__dict__))
 
 @app.route("/edit/<post>", methods=["PUT"])
 def edit_post(post):
-    # requires checking username
+    # requires checking user ID
     pass
 
 @app.route("/deletePost/<post>", methods=["DELETE"])
 def delete_post(post): 
-    # requires checking username
+    # requires checking user ID
     pass
 
 @app.route("/deleteThread/<thread>", methods=["DELETE"])
 def delete_thread(thread):
-    # requires checking username
+    # requires checking user ID
     pass
 
 @app.route("/createAccount/<username>", methods=["POST"])
-def create_username(username):
+def create_account(username):
     user_dict = {"username": username, "joined": datetime.now()}
     user_obj = User(**user_dict)
-    insert_response = mongo.db.users.insert_one(user_obj.__dict__)
-    return {"id": str(insert_response.inserted_id)}
-
-
-
-
+    users.insert_one(user_obj.__dict__)
+    return to_json(user_obj.__dict__)
