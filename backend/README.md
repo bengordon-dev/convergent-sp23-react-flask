@@ -147,3 +147,23 @@ Returned by the `/createAccount` route
     </tr>
   </tbody>
 </table>
+
+
+# Installation
+
+The following Python libraries must be installed with pip:
+- flask
+- pymongo
+- flask_pymongo
+- pydantic
+
+
+Quick MacOS script (assumes pip and brew are already installed)
+```
+brew tap mongodb/brew
+brew install mongodb-community@6.0
+brew services start mongodb-community@6.0
+
+pip3 install flask pymongo flask_pymongo pydantic
+```
+
