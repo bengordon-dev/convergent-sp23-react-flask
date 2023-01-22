@@ -16,19 +16,20 @@ class PydanticObjectId(ObjectId):
         return PydanticObjectId(v)
 
 class Thread(BaseModel):
-    creatorUsername: str
-    creationTimestamp: datetime
     _id: Optional[PydanticObjectId]
-    category: str
+    category: Optional[str]
     title: str
     posts: int 
+    creatorID: PydanticObjectId
+    creationTimestamp: datetime
+    lastPost: Optional[datetime]
 
 class Post(BaseModel):
     _id: Optional[PydanticObjectId]
     threadID: PydanticObjectId
-    creationTimestamp: datetime
-    creatorUsername: str
     content: str
+    creatorID: PydanticObjectId
+    creationTimestamp: datetime
 
 class User(BaseModel):
     username: str
