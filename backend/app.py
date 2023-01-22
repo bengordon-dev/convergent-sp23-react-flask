@@ -46,6 +46,7 @@ def set_creator_info(data):
 
 
 # form data required: username
+# returns a user object
 @app.route("/createAccount", methods=["POST"])
 def create_account():
     user_dict = {"username": request.form["username"], "joined": datetime.now()}
@@ -54,6 +55,7 @@ def create_account():
     return to_json(user_obj.__dict__)
 
 # form data required: creatorID, category, title
+# returns a thread object 
 @app.route("/createThread", methods=["POST"])
 def create_thread():
     needed_keys = ["creatorID", "category", "title"]
@@ -77,7 +79,7 @@ def get_all_threads(category=""):
     for thread in thread_list:
         set_creator_info(thread)
     return {"threads": thread_list}
-    
+   
 @app.route("/getAllPosts/<thread>", methods=["GET"])
 def get_all_posts(thread):
     post_list = to_json(posts.find({"threadID": ObjectId(thread)}))
@@ -86,6 +88,7 @@ def get_all_posts(thread):
     return {"posts": post_list}
 
 # form data required: creatorID, content
+# returns a post object
 @app.route("/reply/<thread>", methods=["POST"])
 def post_on_thread(thread):
     needed_keys = ["creatorID", "content"]

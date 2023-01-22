@@ -2,6 +2,7 @@
 Some difference exists in how the data is formatted in the database vs. how it is sent to the frontend. 
 
 ### Threads 
+Returned by the `/createThread` and `/getAllThreads/<category>` routes
 
 <table>
   <thead>
@@ -62,6 +63,7 @@ Some difference exists in how the data is formatted in the database vs. how it i
 </table>
 
 ### Posts
+Returned by the `/getAllPosts/<thread>` and `/reply/<thread>` routes
 
 <table>
   <thead>
@@ -110,6 +112,7 @@ Some difference exists in how the data is formatted in the database vs. how it i
 </table>
 
 ### Users
+Returned by the `/createAccount` route
 
 <table>
   <thead>
