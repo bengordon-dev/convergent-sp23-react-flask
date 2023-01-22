@@ -24,7 +24,7 @@ function PostsSection({ posts, thread, threads, setPosts }) {
                 <input type="text" className="w-full h-10 border-2 border-gray-300 rounded-lg px-4 mr-4" placeholder="Create a new post" />
                 <button type="submit" className="bg-pink-800 text-white font-bold py-2 px-4 rounded">Create</button>
             </form>
-            {posts.map((post) => {
+            {posts.filter(post => post.thread == thread).map((post) => {
                 return (
                     <div key={post.id} className="bg-gray-100 rounded-lg px-4 py-2 my-2 flex flex-row justify-between cursor-pointer hind-madurai">
                         <div className="text-md">{post.content}</div>
