@@ -1,10 +1,11 @@
 import React from 'react'
-import ThreadsSection from './ThreadsSection'
 
 function PostsSection({ posts, thread, threads, setPosts }) {
 
     const createPost = (e) => {
         e.preventDefault()
+
+        if (e.target[0].value == '') return        
 
         var newpost = {
             id: posts.length + 1,
@@ -16,6 +17,7 @@ function PostsSection({ posts, thread, threads, setPosts }) {
 
         setPosts([...posts, newpost])
         threads[threads.findIndex(t => t.name == thread)].posts += 1
+        e.target[0].value = ''
     }
     return (
         <div className='col-span-3'>
