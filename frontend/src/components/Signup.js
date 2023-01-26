@@ -1,11 +1,24 @@
 import React from 'react'
+import { useNavigate } from "react-router-dom";
 
-function Signup() {
+function Signup(props) {
+  const navigate = useNavigate();
 
   const signup = (e) => {
     e.preventDefault();
 
-    console.log(e.target[0].value)
+    const uname = (e.target[0].value)
+
+    fetch("http://localhost:8080/createAccount", {method: "post", body: JSON.stringify({username: uname})})
+    .then((res) => res.json())
+    .then((res) => {
+      localStorage.setItem("forumToken", res._id)
+      localStorage.setItem("forumUsername", res.username)
+      props.setUserID(res._id)
+      props.setUsername(res.username)
+      navigate('/');
+    })
+
   }
 
   return (
