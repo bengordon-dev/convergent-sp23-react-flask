@@ -62,15 +62,19 @@ def create_account():
 # returns a thread object 
 @app.route("/createThread", methods=["POST"])
 def create_thread():
+    data = json.loads(request.data)
     needed_keys = ["creatorID", "category", "title"]
     dict_thread = {
-        **{x:request.form[x] for x in needed_keys},
+        **{x:data[x] for x in needed_keys},
         "creationTimestamp": datetime.now(),
         "posts": 0
     }
     new_thread = Thread(**dict_thread)
     threads.insert_one(new_thread.__dict__)
-    return to_json(set_creator_info(new_thread.__dict__))
+    res = jsonify(to_json(set_creator_info(new_thread.__dict__)))
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true" )
+    return res
 
 @app.route("/getAllThreads/", methods=["GET"])
 @app.route("/getAllThreads/<category>", methods=["GET"])
@@ -82,24 +86,32 @@ def get_all_threads(category=""):
         thread_list = to_json(threads.find({"category": category}))
     for thread in thread_list:
         set_creator_info(thread)
-    return {"threads": thread_list}
+    
+    res = jsonify({"threads": thread_list})
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true" )
+    return res
    
 @app.route("/getAllPosts/<thread>", methods=["GET"])
 def get_all_posts(thread):
     post_list = to_json(posts.find({"threadID": ObjectId(thread)}))
     for post in post_list:
         set_creator_info(post)
-    return {"posts": post_list}
+    res = jsonify({"posts": post_list})
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true" )
+    return res
 
 # form data required: creatorID, content
 # returns a post object
 @app.route("/reply/<thread>", methods=["POST"])
 def post_on_thread(thread):
+    data = json.loads(request.data)
     needed_keys = ["creatorID", "content"]
     dict_post = {
         "threadID": ObjectId(thread),
         "creationTimestamp": datetime.now(),  
-        **{x:request.form[x] for x in needed_keys},
+        **{x:data[x] for x in needed_keys},
     }
     new_post = Post(**dict_post)
     posts.insert_one(new_post.__dict__)
@@ -107,7 +119,10 @@ def post_on_thread(thread):
     threads.update_one({"_id": ObjectId(thread)}, 
         {"$set": {"posts": old_post_count + 1, "lastPost": new_post.creationTimestamp}}
     )
-    return to_json(set_creator_info(new_post.__dict__))
+    res = jsonify(to_json(set_creator_info(new_post.__dict__)))
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true" )
+    return res
 
 @app.route("/edit/<post>", methods=["PUT"])
 def edit_post(post):

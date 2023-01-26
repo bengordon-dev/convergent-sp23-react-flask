@@ -5,6 +5,21 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import { useState, useEffect } from 'react';
 
+/*
+fetch("http://localhost:8080/createThread", 
+{method: "post", body: JSON.stringify({creatorID: "", "category": "", title: ""})}).then((res) => res.json()).then((res) => console.log(res))
+
+fetch("http://localhost:8080/reply/<threadID>",
+{method: "post", body: JSON.stringify({creatorID: "", "content": "p"})}).then((res) => res.json()).then((res) => console.log(res))
+
+
+fetch("http://localhost:8080/getAllThreads/<category>").then((res) => res.json()).then((res) => console.log(res))
+
+
+fetch("http://localhost:8080/getAllPosts/<threadID>").then((res) => res.json()).then((res) => console.log(res))
+
+*/
+
 function App() {  
   const [userID, setUserID] = useState(localStorage.getItem("forumToken"));
   const [username, setUsername] = useState(localStorage.getItem("forumUsername"))
