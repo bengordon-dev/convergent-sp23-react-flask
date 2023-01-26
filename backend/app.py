@@ -44,8 +44,13 @@ def set_creator_info(data):
         del data["threadID"]
     return data
 
+def corsify(res_data):
+    res = jsonify(res_data)
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true")
+    return res
 
-# form data required: username
+# body data required: username
 # returns a user object
 @app.route("/createAccount", methods=["POST"])
 def create_account():
@@ -53,12 +58,9 @@ def create_account():
     user_dict = {"username": data["username"], "joined": datetime.now()}
     user_obj = User(**user_dict)
     users.insert_one(user_obj.__dict__)
-    res = jsonify(to_json(user_obj.__dict__))
-    res.headers.add('Access-Control-Allow-Origin', '*')
-    res.headers.add("Access-Control-Allow-Credentials", "true" )
-    return res
+    return corsify(to_json(user_obj.__dict__))
 
-# form data required: creatorID, category, title
+# body data required: creatorID, category, title
 # returns a thread object 
 @app.route("/createThread", methods=["POST"])
 def create_thread():
@@ -71,10 +73,7 @@ def create_thread():
     }
     new_thread = Thread(**dict_thread)
     threads.insert_one(new_thread.__dict__)
-    res = jsonify(to_json(set_creator_info(new_thread.__dict__)))
-    res.headers.add('Access-Control-Allow-Origin', '*')
-    res.headers.add("Access-Control-Allow-Credentials", "true" )
-    return res
+    return corsify(to_json(set_creator_info(new_thread.__dict__)))
 
 @app.route("/getAllThreads/", methods=["GET"])
 @app.route("/getAllThreads/<category>", methods=["GET"])
@@ -86,23 +85,16 @@ def get_all_threads(category=""):
         thread_list = to_json(threads.find({"category": category}))
     for thread in thread_list:
         set_creator_info(thread)
-    
-    res = jsonify({"threads": thread_list})
-    res.headers.add('Access-Control-Allow-Origin', '*')
-    res.headers.add("Access-Control-Allow-Credentials", "true" )
-    return res
+    return corsify({"threads": thread_list})
    
 @app.route("/getAllPosts/<thread>", methods=["GET"])
 def get_all_posts(thread):
     post_list = to_json(posts.find({"threadID": ObjectId(thread)}))
     for post in post_list:
         set_creator_info(post)
-    res = jsonify({"posts": post_list})
-    res.headers.add('Access-Control-Allow-Origin', '*')
-    res.headers.add("Access-Control-Allow-Credentials", "true" )
-    return res
+    return corsify({"posts": post_list})
 
-# form data required: creatorID, content
+# body data required: creatorID, content
 # returns a post object
 @app.route("/reply/<thread>", methods=["POST"])
 def post_on_thread(thread):
@@ -119,20 +111,41 @@ def post_on_thread(thread):
     threads.update_one({"_id": ObjectId(thread)}, 
         {"$set": {"posts": old_post_count + 1, "lastPost": new_post.creationTimestamp}}
     )
-    res = jsonify(to_json(set_creator_info(new_post.__dict__)))
-    res.headers.add('Access-Control-Allow-Origin', '*')
-    res.headers.add("Access-Control-Allow-Credentials", "true" )
-    return res
+    return corsify(to_json(set_creator_info(new_post.__dict__)))
 
-@app.route("/edit/<post>", methods=["PUT"])
+# body data required: "creatorID", "newContent"
+@app.route("/editPost/<post>", methods=["PUT"])
 def edit_post(post):
     # requires checking user ID
-    pass
+    data = json.loads(request.data)
+    old_post = posts.find_one({"_id": ObjectId(post)})
+    changed = False
+    if old_post != None and "creatorID" in data and str(old_post["creatorID"]) == data["creatorID"]:
+        posts.update_one({"_id": ObjectId(post)}, {"$set": {"content": data["newContent"]}})
+        changed = True
+    return corsify({"changed": changed})
 
 @app.route("/deletePost/<post>", methods=["DELETE"])
 def delete_post(post): 
     # requires checking user ID
     pass
+
+# body data required: "creatorID", 1+ of "newTitle", "newCategory"
+@app.route("/editThread/<thread>", methods=["PUT"])
+def edit_thread(thread):
+    # requires checking user ID
+    data = json.loads(request.data)
+    old_thread = threads.find_one({"_id": ObjectId(thread)})
+    changed = False
+    valid_uid = "creatorID" in data and str(old_thread["creatorID"]) == data["creatorID"]
+    if old_thread != None and valid_uid and ("newTitle" in data or "newCategory" in data):
+        fields = {
+            **({"title": data["newTitle"]} if "newTitle" in data else {}), 
+            **({"category": data["newCategory"]} if "newCategory" in data else {})
+        }
+        threads.update_one({"_id": ObjectId(thread)}, {"$set": fields})
+        changed = True
+    return corsify({"changed": changed})
 
 @app.route("/deleteThread/<thread>", methods=["DELETE"])
 def delete_thread(thread):
