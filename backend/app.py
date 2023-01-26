@@ -86,6 +86,11 @@ def get_all_threads(category=""):
     for thread in thread_list:
         set_creator_info(thread)
     return corsify({"threads": thread_list})
+
+@app.route("/listCategories", methods=["GET"])
+def list_categories():
+    cats = threads.distinct("category")
+    return corsify({"categories": cats})
    
 @app.route("/getAllPosts/<thread>", methods=["GET"])
 def get_all_posts(thread):
