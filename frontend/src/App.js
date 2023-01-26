@@ -47,7 +47,7 @@ function Home(props) {
 
   return (
     <div className="App flex flex-col">
-      <Navbar />
+      <Navbar username={props.username} />
       <Main />
     </div>
   );
