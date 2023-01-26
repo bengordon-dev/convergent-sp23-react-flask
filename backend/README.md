@@ -165,5 +165,6 @@ brew install mongodb-community@6.0
 brew services start mongodb-community@6.0
 
 pip3 install flask pymongo flask_pymongo pydantic
+flask run -h localhost -p 8080
 ```
 
