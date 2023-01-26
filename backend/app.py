@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import json
 from flask_pymongo import PyMongo
 from datetime import datetime
@@ -49,10 +49,14 @@ def set_creator_info(data):
 # returns a user object
 @app.route("/createAccount", methods=["POST"])
 def create_account():
-    user_dict = {"username": request.form["username"], "joined": datetime.now()}
+    data = json.loads(request.data)
+    user_dict = {"username": data["username"], "joined": datetime.now()}
     user_obj = User(**user_dict)
     users.insert_one(user_obj.__dict__)
-    return to_json(user_obj.__dict__)
+    res = jsonify(to_json(user_obj.__dict__))
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true" )
+    return res
 
 # form data required: creatorID, category, title
 # returns a thread object 
