@@ -1,9 +1,9 @@
 import Navbar from './components/Navbar';
 import Main from './components/Main';
-import { BrowserRouter, Routes, Route, redirect } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Login from './components/Login';
 import Signup from './components/Signup';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {  
   return (
@@ -19,11 +19,14 @@ function App() {
 }
 
 function Home() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
-  if (!user) {
-    window.location.href = '/signup';
-  }
+  useEffect(() => {
+    if (!user) {
+      navigate('/signup');
+    }
+  }, [user]);
 
   return (
     <div className="App flex flex-col">
