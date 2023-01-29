@@ -13,9 +13,7 @@ function Signup(props) {
     .then((res) => res.json())
     .then((res) => {
       localStorage.setItem("forumToken", res._id)
-      localStorage.setItem("forumUsername", res.username)
       props.setUserID(res._id)
-      props.setUsername(res.username)
       navigate('/');
     })
 
