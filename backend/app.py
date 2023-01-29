@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 import json
 from flask_pymongo import PyMongo
 from datetime import datetime
@@ -59,6 +59,24 @@ def create_account():
     user_obj = User(**user_dict)
     users.insert_one(user_obj.__dict__)
     return corsify(to_json(user_obj.__dict__))
+
+
+@app.route("/userInfo/<id>", methods=["GET"])
+def user_info(id):
+    user = users.find_one({"_id": ObjectId(id)})
+    if user == None:
+        abort(404)
+    return corsify(to_json(user))
+
+@app.route("/changeUsername", methods=["PUT"])
+def change_username():
+    data = json.loads(request.data)
+    old_user = users.find_one({"_id": ObjectId(data["_id"])})
+    if old_user == None:
+        abort(404)
+    users.update_one({"_id": ObjectId(data["_id"])}, {"$set": {"username": data["username"]}})
+    return corsify({"success": True})
+
 
 # body data required: creatorID, category, title
 # returns a thread object 
@@ -130,10 +148,16 @@ def edit_post(post):
         changed = True
     return corsify({"changed": changed})
 
-@app.route("/deletePost/<post>", methods=["DELETE"])
+@app.route("/deletePost/<post>", methods=["POST"])
 def delete_post(post): 
     # requires checking user ID
-    pass
+    data = json.loads(request.data)
+    old_post = posts.find_one({"_id": ObjectId(post)})
+    success = False
+    if old_post != None and "creatorID" in data and str(old_post["creatorID"]) == data["creatorID"]:
+        posts.delete_one({"_id": ObjectId(post)})
+        success = True
+    return corsify({"success": success})
 
 # body data required: "creatorID", 1+ of "newTitle", "newCategory"
 @app.route("/editThread/<thread>", methods=["PUT"])
@@ -152,7 +176,14 @@ def edit_thread(thread):
         changed = True
     return corsify({"changed": changed})
 
-@app.route("/deleteThread/<thread>", methods=["DELETE"])
+@app.route("/deleteThread/<thread>", methods=["POST"])
 def delete_thread(thread):
     # requires checking user ID
-    pass
+    data = json.loads(request.data)
+    old_thread = threads.find_one({"_id": ObjectId(thread)})
+    success = False
+    if old_thread != None and "creatorID" in data and str(old_thread["creatorID"]) == data["creatorID"]:
+        threads.delete_one({"_id": ObjectId(thread)})
+        posts.delete_many({"threadID": ObjectId(thread)})
+        success = True
+    return corsify({"success": success})
