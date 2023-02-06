@@ -30,16 +30,19 @@ function ThreadsSection({ threads, setThreads, activeThread, setActiveThread, ca
     
   return (
     <div className=''>
-      <div className="text-xl font-bold uppercase content-end mb-4 lora">Threads</div>
-      <select value={selectedCat} onChange={(e) => setSelectedCat(e.target.value)}>
-        <option>All</option>
-        {categories && categories.map((cat) => <option>{cat}</option>)}
-      </select>
-      <button onClick={refreshThreads}>Refresh Threads</button>
-      <form onSubmit={createThread}>
-        <input type="text" placeholder="title"></input>
-        <input type="text" placeholder='category'></input>
-        <button type="submit">Create Thread</button>
+      <div className="text-xl font-bold uppercase content-end mb-5 lora">Threads</div>
+      <div className="w-full flex flex-row h-8 items-center">
+        <select className="flex my-2 font-semibold w-full mr-2 h-full" value={selectedCat} onChange={(e) => setSelectedCat(e.target.value)}>
+          <option>All</option>
+          {categories && categories.map((cat) => <option>{cat}</option>)}
+        </select>
+        <button className="font-semibold flex bg-pink-800 rounded-md px-3 p-1 text-white text-xl" onClick={refreshThreads}>&#8634;</button>
+      </div>
+      
+      <form className="mt-4" onSubmit={createThread}>
+        <input className="flex w-full p-2 tracking-wide border rounded-md mb-2" type="text" placeholder="title"></input>
+        <input className="flex w-full p-2 tracking-wide border rounded-md mb-4" type="text" placeholder='category'></input>
+        <button className="flex w-full p-1 justify-center tracking-wide border rounded-md mb-2 bg-pink-800 text-white font-semibold" type="submit">Create Thread</button>
       </form>
       {threads.map((thread) => {
         return (
