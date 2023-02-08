@@ -1,8 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 
 function Signup(props) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (props.userID) {
+      console.log("Already logged in")
+      navigate('/');
+    }
+  }, [props.userID])
 
   const signup = (e) => {
     e.preventDefault();

@@ -6,7 +6,6 @@ import Signup from './components/Signup';
 import { useState, useEffect } from 'react';
 import Home from './components/Home';
 
-
 function App() {  
   const [userID, setUserID] = useState(localStorage.getItem("forumToken"));
 
@@ -15,7 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home userID={userID} />}/>
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup setUserID={setUserID} />} />
+        <Route path="/signup" element={<Signup setUserID={setUserID} userID={userID} />} />
       </Routes>
       
     </BrowserRouter>

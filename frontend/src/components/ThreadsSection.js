@@ -7,12 +7,12 @@ function ThreadsSection({ threads, setThreads, activeThread, setActiveThread, ca
 
   function createThread(e) {
     e.preventDefault()
-    if (e.target[0].value === "" || e.target[1].value === "") return 
+    if (e.target[0].value === "" || (selectedCat == "All" && e.target[1].value === "")) return 
 
     console.log(e.target[0].value, e.target[1].value)
 
     fetch("http://localhost:8080/createThread", {
-      method: "post", body: JSON.stringify({creatorID: userID, category: e.target[1].value, title: e.target[0].value})
+      method: "post", body: JSON.stringify({creatorID: userID, category: e.target[1].value == "" ? selectedCat : e.target[1].value, title: e.target[0].value})
     }).then((res) => res.json()).then((res) => {
       if (!categories.includes(res.category)) {
         setCategories([...categories, res.category])
@@ -29,6 +29,10 @@ function ThreadsSection({ threads, setThreads, activeThread, setActiveThread, ca
     e.target[0].value = ''
     e.target[1].value = ''
   }
+
+  function refreshThreads() {
+    window.location.reload(true)
+  }
     
   return (
     <div className=''>
@@ -41,7 +45,7 @@ function ThreadsSection({ threads, setThreads, activeThread, setActiveThread, ca
         <button className="font-semibold flex bg-pink-800 rounded-md px-3 text-white text-lg" onClick={refreshThreads}>&#8634;</button>
       </div>
       
-      <form className="mt-4 text-sm" onSubmit={(e) => createThread(e)}>
+      <form className="my-4 mb-6 text-sm" onSubmit={(e) => createThread(e)}>
         <input className="flex w-full p-2 tracking-wide border rounded-md mb-2" type="text" placeholder="title"></input>
         <input className="flex w-full p-2 tracking-wide border rounded-md mb-4" type="text" placeholder='category'></input>
         <button className="flex w-full p-1 py-1.5 justify-center tracking-wide border rounded-md mb-2 bg-pink-800 text-white font-semibold" type="submit">Create Thread</button>
