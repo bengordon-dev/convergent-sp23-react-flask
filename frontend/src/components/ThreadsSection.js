@@ -9,6 +9,8 @@ function ThreadsSection({ threads, setThreads, activeThread, setActiveThread, ca
     e.preventDefault()
     if (e.target[0].value === "" || e.target[1].value === "") return 
 
+    console.log(e.target[0].value, e.target[1].value)
+
     fetch("http://localhost:8080/createThread", {
       method: "post", body: JSON.stringify({creatorID: userID, category: e.target[1].value, title: e.target[0].value})
     }).then((res) => res.json()).then((res) => {
@@ -31,18 +33,18 @@ function ThreadsSection({ threads, setThreads, activeThread, setActiveThread, ca
   return (
     <div className=''>
       <div className="text-xl font-bold uppercase content-end mb-5 lora">Threads</div>
-      <div className="w-full flex flex-row h-8 items-center">
+      <div className="w-full flex flex-row h-7 items-center">
         <select className="flex my-2 font-semibold w-full mr-2 h-full" value={selectedCat} onChange={(e) => setSelectedCat(e.target.value)}>
           <option>All</option>
           {categories && categories.map((cat) => <option>{cat}</option>)}
         </select>
-        <button className="font-semibold flex bg-pink-800 rounded-md px-3 p-1 text-white text-xl" onClick={refreshThreads}>&#8634;</button>
+        <button className="font-semibold flex bg-pink-800 rounded-md px-3 text-white text-lg" onClick={refreshThreads}>&#8634;</button>
       </div>
       
-      <form className="mt-4" onSubmit={createThread}>
+      <form className="mt-4 text-sm" onSubmit={(e) => createThread(e)}>
         <input className="flex w-full p-2 tracking-wide border rounded-md mb-2" type="text" placeholder="title"></input>
         <input className="flex w-full p-2 tracking-wide border rounded-md mb-4" type="text" placeholder='category'></input>
-        <button className="flex w-full p-1 justify-center tracking-wide border rounded-md mb-2 bg-pink-800 text-white font-semibold" type="submit">Create Thread</button>
+        <button className="flex w-full p-1 py-1.5 justify-center tracking-wide border rounded-md mb-2 bg-pink-800 text-white font-semibold" type="submit">Create Thread</button>
       </form>
       {threads.map((thread) => {
         return (
