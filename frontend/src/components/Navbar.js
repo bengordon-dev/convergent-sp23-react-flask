@@ -9,6 +9,7 @@ function Navbar() {
           <div alt="avatar" className='bg-white rounded-lg w-10 h-10 mr-2 flex text-center justify-center cursor-pointer'>
             <div className="text-lg p-1 font-semibold">JD</div>
           </div>
+          
         </div>
     </header>
   )

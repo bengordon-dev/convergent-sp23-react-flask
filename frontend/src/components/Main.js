@@ -43,7 +43,7 @@ function Main() {
 
     return (
         <div className='grid grid-cols-4 pt-10 gap-8 px-44 font-sans'>
-            <ThreadsSection threads={threads} activeThread={activeThread} setActiveThread={setActiveThread} />
+            <ThreadsSection threads={threads} setThreads={setThreads} activeThread={activeThread} setActiveThread={setActiveThread} />
             <PostsSection posts={posts.filter(post => post.thread == activeThread)} threads={threads} thread={activeThread} setPosts={setPosts} />
         </div>
     )
