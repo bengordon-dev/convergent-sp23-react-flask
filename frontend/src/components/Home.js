@@ -9,13 +9,22 @@ export default function Home(props) {
 
   useEffect(() => {
     if (!props.userID) {
-      navigate('/signup');
+      navigate('/login');
     }
   }, [props.userID]);
 
   useEffect(() => {
     if (props.userID) {
-      fetch(`http://localhost:8080/userInfo/${props.userID}`).then((res) => (res.json())).then((res) => setUsername(res.username))
+      fetch(`http://localhost:8080/userInfo/${props.userID}`).then((res) => (res.json())).then((res) => {
+        if (res.error) {
+          localStorage.removeItem('forumToken')
+          props.setUserID(null)
+          navigate('/login')
+        }
+        else {
+          setUsername(res.username)
+        }
+      })
     }
   }, [])
 

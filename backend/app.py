@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, Response
 import json
 from flask_pymongo import PyMongo
 from datetime import datetime
 from schemas import Thread, Post, User
 from bson import json_util, ObjectId
+from bson.errors import InvalidId
 
 app = Flask("Forum")
 app.config["MONGO_URI"] = "mongodb://localhost:27017/forum"
@@ -50,6 +51,11 @@ def corsify(res_data):
     res.headers.add("Access-Control-Allow-Credentials", "true")
     return res
 
+def corsify_res(res):
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    res.headers.add("Access-Control-Allow-Credentials", "true")
+    return res
+
 # body data required: username
 # returns a user object
 @app.route("/createAccount", methods=["POST"])
@@ -60,12 +66,23 @@ def create_account():
     users.insert_one(user_obj.__dict__)
     return corsify(to_json(user_obj.__dict__))
 
+@app.route("/logIn", methods=["POST"])
+def log_in():
+    data = json.loads(request.data)
+    user = users.find_one({"username": data["username"]})
+    if user == None:
+        return corsify({"error": "No such user exists"}), 404
+    return corsify(to_json(user))
+
 
 @app.route("/userInfo/<id>", methods=["GET"])
 def user_info(id):
-    user = users.find_one({"_id": ObjectId(id)})
+    try: 
+        user = users.find_one({"_id": ObjectId(id)})
+    except InvalidId:
+        return corsify({"error": "Invalid User ID"}), 500
     if user == None:
-        abort(404)
+        return corsify({"error": "No such user exists"}), 404
     return corsify(to_json(user))
 
 @app.route("/changeUsername", methods=["PUT"])
@@ -73,7 +90,7 @@ def change_username():
     data = json.loads(request.data)
     old_user = users.find_one({"_id": ObjectId(data["_id"])})
     if old_user == None:
-        abort(404)
+        return corsify({"error": "No such user exists"}), 404
     users.update_one({"_id": ObjectId(data["_id"])}, {"$set": {"username": data["username"]}})
     return corsify({"success": True})
 
