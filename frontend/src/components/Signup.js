@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
 
 function Signup(props) {
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("")
+
 
   useEffect(() => {
     if (props.userID) {
@@ -19,9 +21,14 @@ function Signup(props) {
     fetch("http://localhost:8080/createAccount", {method: "post", body: JSON.stringify({username: uname})})
     .then((res) => res.json())
     .then((res) => {
-      localStorage.setItem("forumToken", res._id)
-      props.setUserID(res._id)
-      navigate('/');
+      if (res.error) {
+        setErrorMessage(res.error)
+      }
+      else {
+        localStorage.setItem("forumToken", res._id)
+        props.setUserID(res._id)
+        navigate('/');
+      }
     })
 
   }
@@ -34,6 +41,7 @@ function Signup(props) {
           <input className="w-80 h-10 mt-10 border-2 border-gray-300 rounded-lg px-2" type="text" placeholder="Username" />
           <button type="submit" className="w-80 h-10 mt-5 bg-pink-700 hover:bg-pink-800 rounded-lg text-white">Sign Up</button>
         </form>
+        {errorMessage.length > 0 && <p className="text-red-700">{errorMessage}</p>}
         <div>
           <p className="text-sm mt-4">Already have an account? <a className="text-pink-700 font-bold" href="/login">Login</a></p>
         </div>

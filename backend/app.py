@@ -61,6 +61,9 @@ def corsify_res(res):
 @app.route("/createAccount", methods=["POST"])
 def create_account():
     data = json.loads(request.data)
+    old_user = users.find_one({"username": data["username"]})
+    if old_user != None:
+        return corsify({"error": "Username already taken"}), 500
     user_dict = {"username": data["username"], "joined": datetime.now()}
     user_obj = User(**user_dict)
     users.insert_one(user_obj.__dict__)
