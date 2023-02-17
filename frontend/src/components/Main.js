@@ -10,6 +10,7 @@ function Main(props) {
   const [selectedCat, setSelectedCat] = useState("All") 
   const threadIndex = threads.findIndex(t => t._id == activeThread)
 
+
     
   useEffect(() => {
     fetch("http://localhost:8080/listCategories")

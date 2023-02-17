@@ -137,7 +137,7 @@ def post_on_thread(thread):
     return corsify(to_json(set_creator_info(new_post.__dict__)))
 
 # body data required: "creatorID", "newContent"
-@app.route("/editPost/<post>", methods=["PUT"])
+@app.route("/editPost/<post>", methods=["POST"])
 def edit_post(post):
     # requires checking user ID
     data = json.loads(request.data)

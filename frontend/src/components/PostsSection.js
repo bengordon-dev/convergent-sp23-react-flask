@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 
@@ -7,9 +7,14 @@ function PostsSection({ posts, threads, thread, setPosts, title, userID, deleteA
   const timeAgo = new TimeAgo()
   const deleteStyles = "p-0.5 text-red-500 italic hover:underline"
 
+  const [editingID, setEditingID] = useState("")
+  const editingIndex = posts.findIndex(p => p._id === editingID)
+  const [editingContent, setEditingContent] = useState("")
+
+
   const createPost = (e) => {
     e.preventDefault()
-    if (e.target[0].value == '') return        
+    if (e.target[0].value === '') return        
 
     fetch(`http://localhost:8080/reply/${thread}`, {
       method: "post", body: JSON.stringify({creatorID: userID, content: e.target[0].value})
@@ -20,11 +25,31 @@ function PostsSection({ posts, threads, thread, setPosts, title, userID, deleteA
   }
 
   function deletePost(post) {
+    fetch(`http://localhost:8080/deletePost/${post}`, {
+      method: "post"
+    })
+  }
 
+  function beginEditingPost(post) {
+    setEditingID(post._id)
+    setEditingContent(post.content)
   }
 
   function editPost(post) {
-
+    fetch(`http://localhost:8080/editPost/${post}`, {
+      method: "post",  body: JSON.stringify({creatorID: userID, newContent: editingContent})
+    }).then((res) => res.json()).then((res) => {
+      if (res.changed) {
+        setEditingID("")
+        let newPost = {...posts[editingIndex]}
+        newPost.content = editingContent
+        setPosts([...posts.slice(0, editingIndex), newPost, ...posts.slice(editingIndex + 1)])
+        setEditingContent("")
+      } else {
+        setEditingContent("")
+        setEditingID("")
+      }
+    })
   }
 
   return (
@@ -48,14 +73,25 @@ function PostsSection({ posts, threads, thread, setPosts, title, userID, deleteA
         const date = new Date(post.creationTimestamp)
         return (
           <div key={post._id} className="bg-gray-100 rounded-lg px-4 py-4 my-2 ">
-            <div className="flex flex-row justify-between cursor-pointer hind-madurai mb-2">
-              <div className="text-md">{post.content}</div>
-            </div>
+            {editingID === post._id ? 
+              <div>
+                <textarea className='w-full' value={editingContent} onChange={(e) => setEditingContent(e.target.value)} />
+              </div>
+              : 
+              <div className="flex flex-row justify-between cursor-pointer hind-madurai mb-2">
+                <div className="text-md">{post.content}</div>
+              </div> 
+            }
             <div className='flex flex-row justify-between text-sm italic'>
               <div className="text-gray-500">Posted by {post.creator.username} ({timeAgo.format(date)})</div>
               {post.creator._id === userID &&
                 <div>
-                  <button className="p-0.5 px-2 text-blue-500 italic hover:underline" onClick={() => editPost(post._id)}>Edit</button>
+                  {editingID === post._id && <button onClick={() => setEditingID("")}>Cancel</button>}
+                  <button className="p-0.5 px-2 text-blue-500 italic hover:underline" 
+                    onClick={editingID === post._id ? () => editPost(post._id) : () => beginEditingPost(post)}
+                  >
+                    {editingID === post._id ? "Confirm" : "Edit"}
+                  </button>
                   <button className={deleteStyles + " pl-1"} onClick={() => deletePost(post._id)}>Delete</button>
                 </div>}
             </div>
