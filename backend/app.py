@@ -182,6 +182,9 @@ def delete_post(post):
     old_post = posts.find_one({"_id": ObjectId(post)})
     success = False
     if old_post != None and "creatorID" in data and str(old_post["creatorID"]) == data["creatorID"]:
+        thread = threads.find_one({"_id": ObjectId(old_post["threadID"])})
+        if thread != None:
+            threads.update_one({"_id": thread["_id"]}, {"$set": {"posts": thread["posts"] - 1}})
         posts.delete_one({"_id": ObjectId(post)})
         success = True
     return corsify({"success": success})

@@ -26,8 +26,9 @@ function PostsSection({ posts, threads, thread, setPosts, title, userID, deleteA
 
   function deletePost(post) {
     fetch(`http://localhost:8080/deletePost/${post}`, {
-      method: "post"
-    })
+      method: "post", body: JSON.stringify({creatorID: userID})
+    }).then((res) => res.json()).then((res) => setPosts([...posts.filter(p => p._id !== post)]))
+    threads[threadIndex].posts -= 1
   }
 
   function beginEditingPost(post) {
