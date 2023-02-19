@@ -7,7 +7,7 @@ A Flask app that manages a MongoDB database with 3 collections (threads, posts, 
 Basic steps:
 1. Install MongoDB on your computer
 2. Install the following Python libraries with pip: flask, pymongo, flask_pymongo, pydantic
-3. Get MongoDB running computer
+3. Get MongoDB running on your computer
 4. Run the Flask app
 
 Quick MacOS script (assumes pip and homebrew are already installed)
