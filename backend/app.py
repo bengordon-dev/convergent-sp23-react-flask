@@ -12,12 +12,17 @@ app = Flask("Forum")
 app.config["MONGO_URI"] = "mongodb://localhost:27017/forum"
 mongo = PyMongo(app)
 
+
+# COLLECTIONS
+
 users = mongo.db.users
 threads = mongo.db.threads
 posts = mongo.db.posts
 
 
-# data must be a dictionary 
+# HELPER METHODS
+
+# helper for to_json
 def flatten_ids_dates(data):
     if not isinstance(data, dict):
         raise ValueError("Data must be a dictionary")
@@ -28,7 +33,7 @@ def flatten_ids_dates(data):
             elif "$date" in data[x]:
                 data[x] = data[x]["$date"]
 
-# cleans up dates and ids
+# Converts Python dictionaries to JSON, converting dates and IDs to strings
 def to_json(data):
     out = json.loads(json_util.dumps(data, default=json_util.default))
     if isinstance(out, list):
@@ -38,6 +43,7 @@ def to_json(data):
         flatten_ids_dates(out)
     return out
 
+# Converts user IDs to user objects when returning
 def set_creator_info(data):
     data["creator"] = to_json(users.find_one({"_id": ObjectId(data["creatorID"])}))
     del data["creatorID"]
@@ -45,16 +51,18 @@ def set_creator_info(data):
         del data["threadID"]
     return data
 
+# Adds CORS headers to responses. 
+# The second line would need to be changed for an app running in the
+# cloud; only allowing requests from localhost:3000 is not permitted, but
+# only allowing requests from a certain web domain is very much possible.
 def corsify(res_data):
     res = jsonify(res_data)
     res.headers.add('Access-Control-Allow-Origin', '*')
     res.headers.add("Access-Control-Allow-Credentials", "true")
     return res
 
-def corsify_res(res):
-    res.headers.add('Access-Control-Allow-Origin', '*')
-    res.headers.add("Access-Control-Allow-Credentials", "true")
-    return res
+
+# ROUTES
 
 # body data required: username
 # returns a user object
@@ -96,7 +104,6 @@ def change_username():
         return corsify({"error": "No such user exists"}), 404
     users.update_one({"_id": ObjectId(data["_id"])}, {"$set": {"username": data["username"]}})
     return corsify({"success": True})
-
 
 # body data required: creatorID, category, title
 # returns a thread object 

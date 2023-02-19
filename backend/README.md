@@ -1,4 +1,34 @@
-# Object formats
+# Backend
+A Flask app that manages a MongoDB database with 3 collections (threads, posts, and users.)
+
+---
+## Installation/Setup
+
+
+Basic steps:
+1. Install MongoDB on your computer
+2. Install the following Python libraries with pip: flask, pymongo, flask_pymongo, pydantic
+3. Get MongoDB running computer
+4. Run the Flask app
+
+Quick MacOS script (assumes pip and homebrew are already installed)
+```
+brew tap mongodb/brew
+brew install mongodb-community@6.0
+pip3 install flask pymongo flask_pymongo pydantic
+
+brew services start mongodb-community@6.0
+flask run -h localhost -p 8080
+```
+
+---
+## Routes
+
+
+
+---
+## Object formats
+
 Some difference exists in how the data is formatted in the database vs. how it is sent to the frontend. 
 
 ### Threads 
@@ -147,24 +177,3 @@ Returned by the `/createAccount` route
     </tr>
   </tbody>
 </table>
-
-
-# Installation
-
-The following Python libraries must be installed with pip:
-- flask
-- pymongo
-- flask_pymongo
-- pydantic
-
-
-Quick MacOS script (assumes pip and brew are already installed)
-```
-brew tap mongodb/brew
-brew install mongodb-community@6.0
-brew services start mongodb-community@6.0
-
-pip3 install flask pymongo flask_pymongo pydantic
-flask run -h localhost -p 8080
-```
-
