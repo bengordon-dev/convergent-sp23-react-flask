@@ -1,7 +1,6 @@
 # Backend
 A Flask app that manages a MongoDB database with 3 collections (threads, posts, and users.)
 
----
 ## Installation/Setup
 
 
@@ -21,12 +20,10 @@ brew services start mongodb-community@6.0
 flask run -h localhost -p 8080
 ```
 
----
 ## Routes
 
 
 
----
 ## Object formats
 
 Some difference exists in how the data is formatted in the database vs. how it is sent to the frontend. 
