@@ -3,7 +3,6 @@ A Flask app that manages a MongoDB database with 3 collections (threads, posts, 
 
 ## Installation/Setup
 
-
 Basic steps:
 1. Install MongoDB on your computer
 2. Install the following Python libraries with pip: flask, pymongo, flask_pymongo, pydantic
@@ -21,7 +20,38 @@ flask run -h localhost -p 8080
 ```
 
 ## Routes
+All 4 of the basic database operations are included in the API.
 
+### Create
+`POST /createAccount`
+
+`POST /createThread`
+
+`POST /reply/<thread>`
+
+### Read
+`POST /logIn`
+
+`GET /userInfo/<id>`
+
+`GET /getAllThreads/<category>`
+
+`GET /listCategories`
+
+`GET /getAllPosts/<thread>`
+
+### Update
+`POST /changeUsername`
+
+`POST /editThread/<thread>`
+
+`POST /editPost/<post>`
+
+
+### Delete
+`POST /deleteThread/<thread>`
+
+`POST /deletePost/<post>`
 
 
 ## Object formats

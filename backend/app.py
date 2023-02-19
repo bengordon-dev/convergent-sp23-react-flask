@@ -96,7 +96,7 @@ def user_info(id):
         return corsify({"error": "No such user exists"}), 404
     return corsify(to_json(user))
 
-@app.route("/changeUsername", methods=["PUT"])
+@app.route("/changeUsername", methods=["POST"])
 def change_username():
     data = json.loads(request.data)
     old_user = users.find_one({"_id": ObjectId(data["_id"])})
@@ -187,7 +187,7 @@ def delete_post(post):
     return corsify({"success": success})
 
 # body data required: "creatorID", 1+ of "newTitle", "newCategory"
-@app.route("/editThread/<thread>", methods=["PUT"])
+@app.route("/editThread/<thread>", methods=["POST"])
 def edit_thread(thread):
     # requires checking user ID
     data = json.loads(request.data)
